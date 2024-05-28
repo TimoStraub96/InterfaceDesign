@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/face-landmarks-detection"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface"></script>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <title>Document</title>
+
+    <style>
+        #video-container {
+            position: relative;
+            width: 300px; /* Breite des Video-Containers */
+            height: 150px; /* Höhe des Video-Containers */
+        }
+
+        #video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 300px; /* Breite des Videos */
+            height: 150px; /* Höhe des Videos */
+        }
+
+        #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 300px; /* Breite des Overlays */
+            height: 150px; /* Höhe des Overlays */
+        }
+
+        #video-container {
+            position: relative;
+            width: 300px;
+            height: 150px;
+        }
+
+        #video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 300px;
+            height: 150px;
+        }
+
+        #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 300px;
+            height: 150px;
+        }
+
+        #button-container {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+        }
+
+        #smiley-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .emoji {
+            font-size: 24px;
+            margin-right: 10px;
+            position: absolute;
+        }
+    </style>
+</head>
+<body>
+    <div id="video-container">
+        <video id="video" autoplay muted></video>
+        <canvas id="overlay"></canvas>
+    </div>
+
+    <a-scene>
+        <!-- Kamera -->
+        <a-entity camera position="0 1.6 0" look-controls></a-entity>
+
+        <!-- Video-Wände -->
+        <a-plane position="0 2 -4" rotation="0 0 0" width="6" height="3" color="white" material="src: #video"></a-plane>
+        <a-plane position="0 2 4" rotation="0 180 0" width="6" height="3" color="white" material="src: #video"></a-plane>
+        <a-plane position="-4 2 0" rotation="0 90 0" width="6" height="3" color="white" material="src: #video"></a-plane>
+        <a-plane position="4 2 0" rotation="0 -90 0" width="6" height="3" color="white" material="src: #video"></a-plane>
+        
+        <!-- Hintergrund -->
+        <a-sky src="Arena.jpg"></a-sky>
+                <!-- Button -->
+                <a-entity id="button-container" position="0 0 -4">
+                    <a-box width="2" height="0.5" depth="0.1" color="blue"></a-box>
+                    <a-text value="Aktiviere Smileys" position="-0.7 0.15 0" color="white"></a-text>
+                    <a-plane width="2" height="0.5" color="transparent" cursor-listener></a-plane>
+                </a-entity>
+    </a-scene>
+    
+      <!-- Video 1 -->
+      <video id="video1" src="video1.mp4" autoplay loop muted playsinline></video>
+    
+      <!-- Video 2 -->
+      <video id="video2" src="video2.mp4" autoplay loop muted playsinline></video>
+
+      <!-- Weitere Video-Container -->
+      <div id="video-container2">
+        <video id="video" autoplay muted playsinline></video>
+        <canvas id="overlay"></canvas>
+    </div>
+    <div id="video-container3">
+        <video id="video" autoplay muted playsinline></video>
+        <canvas id="overlay"></canvas>
+    </div>
+
+
+
+    <div id="smiley-container"></div>
+    <script src="face-api.min.js"></script>
+    
+    <script>
+
+        AFRAME.registerComponent('cursor-listener', {
+            init: function () {
+                var el = this.el;
+                el.addEventListener('click', function () {
+                    activateSmileys();
+                });
+            }
+        });
+
+        const video = document.getElementById('video');
+        const overlay = document.getElementById('overlay');
+        const overlayContext = overlay.getContext('2d');
+        const smileyContainer = document.getElementById('smiley-container');
+        let smileyInterval;
+
+        async function startVideo() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+            } catch (err) {
+                console.error('Error accessing camera: ', err);
+            }
+        }
+
+        async function setupFaceDetection() {
+            await faceapi.loadTinyFaceDetectorModel('/models');
+            await faceapi.loadFaceLandmarkModel('/models');
+            await faceapi.loadFaceRecognitionModel('/models');
+            await faceapi.loadFaceExpressionModel('/models');
+        }
+
+        function activateSmileys() {
+            clearInterval(smileyInterval);
+            smileyInterval = setInterval(displayEmojis, 1000);
+            setTimeout(() => {
+                clearInterval(smileyInterval);
+            }, 10000); // Stoppe das Intervall nach 10 Sekunden
+        }
+
+        function displayEmojis() {
+            const detections = faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+                .withFaceLandmarks()
+                .withFaceExpressions()
+                .then((detections) => {
+                    detections.forEach((face) => {
+                        const { x, y } = face.detection.box;
+                        const expressions = face.expressions;
+
+                        const emoji = getEmojiForExpression(expressions);
+                        const emojiElement = document.createElement('span');
+                        emojiElement.innerText = emoji;
+                        emojiElement.classList.add('emoji');
+
+                        emojiElement.style.left = `${x}px`;
+                        emojiElement.style.top = `${y}px`;
+
+                        smileyContainer.appendChild(emojiElement);
+
+                        setTimeout(() => {
+                            emojiElement.remove();
+                        }, 5000); // Entferne das Emoji nach 5 Sekunden
+                    });
+                });
+        }
+
+        function getEmojiForExpression(expressions) {
+            const expressionThreshold = 0.1;
+            if (expressions.happy > expressionThreshold) return '😀';
+            if (expressions.sad > expressionThreshold) return '😢';
+            if (expressions.angry > expressionThreshold) return '😠';
+            if (expressions.surprised > expressionThreshold) return '😮';
+            if (expressions.disgusted > expressionThreshold) return '🤢';
+            if (expressions.fearful > expressionThreshold) return '😨';
+            if (expressions.neutral > expressionThreshold) return '😐';
+            return '😐'; // Kein ausdrucksstarkes Emoji
+        }
+
+        async function updateOverlay() {
+            const videoWidth = video.videoWidth;
+            const videoHeight = video.videoHeight;
+            overlay.width = videoWidth;
+            overlay.height = videoHeight;
+            overlayContext.clearRect(0, 0, videoWidth, videoHeight);
+
+            const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+                .withFaceLandmarks()
+                .withFaceExpressions();
+            const resizedDetections = faceapi.resizeResults(detections, { width: videoWidth, height: videoHeight });
+            faceapi.draw.drawDetections(overlay, resizedDetections);
+            faceapi.draw.drawFaceLandmarks(overlay, resizedDetections);
+            faceapi.draw.drawFaceExpressions(overlay, resizedDetections);
+
+            requestAnimationFrame(updateOverlay);
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await startVideo();
+            await setupFaceDetection();
+            updateOverlay();
+        });
+    </script>
+       
+</body>
+</html>
