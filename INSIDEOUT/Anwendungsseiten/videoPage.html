@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Video</title>
+    <style>
+        video {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <video id="expressionVideo" width="720" height="480" controls autoplay></video>
+    <script>
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        const videoSrc = getQueryParam('video');
+        const expressionVideo = document.getElementById('expressionVideo');
+        if (videoSrc) {
+            expressionVideo.src = videoSrc;
+            expressionVideo.play();
+        }
+    </script> 
+</body>
+</html>
