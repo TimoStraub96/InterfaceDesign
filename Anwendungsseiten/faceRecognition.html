@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://use.typekit.net/ojo2ndl.css">
+    <title>FEELINSIDE - Wie fühlst du dich? - Gesichtserkennung</title>
+
+    <style>
+        body {
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: url('../Hintergrund/Hintergrundbild_Gesischtserkennung.webp') no-repeat center center fixed;
+            background-color: #f0f0f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-y: hidden; 
+        }
+        #container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 800px;
+            margin-top: 20px;
+        }
+        #videoContainer {
+            position: relative;
+            width: 480px;
+            height: 320px;
+            background-color: #000;
+            margin-bottom: 20px;
+            margin-top: 50px;
+        }
+        #video {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+        }
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            border-radius: 8px;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 30px;
+            background-color: #AA399A;
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #600F54;
+        }
+        #explanation {
+            width: 150%;
+            padding: 40px;
+            margin: 30px;
+            background: rgb(255 255 255/80%);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 30px;
+            text-align: left;
+            line-height: 1.5;
+        }
+        h3{
+            font-family: "showcard-gothic", sans-serif;
+            color: #AA399A;
+            font-size: 45px;
+            margin: 0;
+            text-align: center;
+        }
+        p{
+            font-size: 25px;
+            line-height: 1.5em;
+            margin: 30px 0px 0px 0px;
+        }
+        #goToMainButton{
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            padding: 10px 20px;
+            font-size: 1.5em;
+            background-color: #AA399A;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 10px;
+            text-decoration: none;
+        }
+        #goToMainButton:hover{
+            background-color: #600F54;
+        }
+    </style>
+
+</head>
+<body>
+
+    <div id="container">
+
+        <div id="videoContainer">                                                       
+            <video id="video" width="480" height="320" controls>                    <!--Kamera-->
+                <source src="../Videos/Joy.mp4" type="video/mp4">                   <!--Anzeige-->
+                <source src="../Videos/Sadness.mp4" type="video/mp4">
+                <source src="../Videos/Angry.mp4" type="video/mp4">
+                <source src="../Videos/Disgust.mp4" type="video/mp4">
+                <source src="../Videos/Fear.mp4" type="video/mp4">
+                <source src="../Videos/neutral.mp4" type="video/mp4">
+                Dein Browser unterstützt das Video-Tag nicht.
+            </video>
+        </div>
+
+        <button id="startEmojiButton">Anzeigen</button>
+
+        <div id="explanation">
+            <h3>Wie funktioniert's?</h3>
+            <p>
+                Die Reise beginnt mit einer <b>Gesichtserkennung und Emotionserkennung</b>. In dieser Anwendung wirst du die 
+                Emotionen-Charakteren aus "Inside Out" sehen. Halte dein Gesicht vor die Kamera, zeige deine <b>aktuelle 
+                Stimmung und Emotionen</b>, und drücke den <b>Button „Anzeigen“</b>. Basierend auf deiner Stimmung erhältst du eine 
+                personalisierte Rückmeldung von einem der Charaktere, wie z.B. Freude könnte dir ermutigende und fröhliche 
+                Nachrichten schicken.
+            </p>
+        </div>
+
+        <a id="goToMainButton" href="/index.html#zielpositionVonIndex">Zur Startseite</a>
+    </div>
+
+    <script src="face-api.min.js"></script>
+
+    <script>
+        const video = document.getElementById('video');
+        const startEmojiButton = document.getElementById('startEmojiButton');
+
+        console.log("Loading models...");
+        Promise.all([
+            faceapi.nets.tinyFaceDetector.loadFromUri('../models/tiny_face_detector_model-weights_manifest.json'),
+            faceapi.nets.faceLandmark68Net.loadFromUri('../models/face_landmark_68_model-weights_manifest.json'),
+            faceapi.nets.faceRecognitionNet.loadFromUri('../models/face_recognition_model-weights_manifest.json'),
+            faceapi.nets.faceExpressionNet.loadFromUri('../models/face_expression_model-weights_manifest.json')
+        ]).then(() => {
+            console.log("Models loaded");
+            startVideo();
+        }).catch(err => console.error("Error loading models: ", err));
+
+        function startVideo() {
+            console.log("Starting video...");
+            navigator.mediaDevices.getUserMedia({ video: {} })
+                .then(stream => {
+                    video.srcObject = stream;
+                    console.log("Video stream started");
+                })
+                .catch(err => console.error("Error starting video stream: ", err));
+        }
+
+        video.addEventListener('play', () => {
+            console.log("Video is playing");
+            const canvas = faceapi.createCanvasFromMedia(video);
+            document.getElementById('videoContainer').append(canvas);
+            const displaySize = { width: video.width, height: video.height };
+            faceapi.matchDimensions(canvas, displaySize);
+
+            setInterval(async () => {
+                try {
+                    const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions();
+                    const resizedDetections = faceapi.resizeResults(detections, displaySize);
+                    canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+                    faceapi.draw.drawDetections(canvas, resizedDetections);
+                    faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
+                    faceapi.draw.drawFaceExpressions(canvas, resizedDetections);
+                } catch (error) {
+                    console.error("Error detecting faces: ", error);
+                }
+            }, 1000);
+        });
+
+        function getVideoForExpression(expressions) {
+            const expressionThreshold = 0.1;
+            if (expressions.happy > expressionThreshold) return '../Videos/Joy.mp4';
+            if (expressions.sad > expressionThreshold) return '../Videos/Sadness.mp4';
+            if (expressions.angry > expressionThreshold) return '../Videos/Angry.mp4';
+            if (expressions.disgusted > expressionThreshold) return '../Videos/Disgust.mp4';
+            if (expressions.fearful > expressionThreshold) return '../Videos/Fear.mp4';
+            return '../Videos/Fear.mp4/neutral.mp4';
+        }
+
+        async function detectExpressionAndRedirect() {
+            console.log("Detecting expressions...");
+            const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions();
+            if (detections.length > 0) {
+                const currentExpressions = detections[0].expressions;
+                const videoSrc = getVideoForExpression(currentExpressions);
+                console.log("Redirecting to: ", videoSrc);
+                window.location.href = `videoPage.html?video=${encodeURIComponent(videoSrc)}`;
+            } else {
+                console.log("No faces detected");
+            }
+        }
+
+        startEmojiButton.addEventListener('click', () => {
+            console.log("Start button clicked");
+            detectExpressionAndRedirect();
+        });
+
+        // Initial video start
+        startVideo();
+
+        document.getElementById('goToMainButton').addEventListener('click', () => {
+            window.location.href = '/index.html';
+        });
+    </script>
+
+</body>
+</html>

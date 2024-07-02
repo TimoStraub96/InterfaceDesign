@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://use.typekit.net/ojo2ndl.css">
+    <title>FEELINSIDE - Lasst uns dir helfen! - Eye Tracking</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-image: url('/Hintergrund/Hintergrundbild_EyeTracking.jpg');
+            background-size: cover;
+            font-family: Arial, sans-serif;
+            color: black;
+            overflow-y: hidden;
+        }
+        h1 {
+            font-family: "showcard-gothic", sans-serif;
+            font-weight: 400;
+            font-size: 1.9em;
+        }
+        .button-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            align-items: center;
+            height: calc(100vh - 180px); 
+            margin-top: 10px; 
+        }
+        .character-button {
+            position: relative;
+            width: 150px;
+            height: 200px;
+            margin: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            border: none;
+            cursor: pointer;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+        .character-button img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background-repeat: no-repeat;
+
+        }
+        .character-button span {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            font-size: 18px;
+            color: white;
+        }
+        .character-button:hover {
+            transform: scale(1.1);
+        }
+        .description {
+            width: 50%;
+            margin: 0 auto 0 auto;
+            padding: 20px;
+            background: rgb(255 255 255/80%);
+            border-radius: 20px;
+            text-align: center;
+            font-size: 20px;
+            line-height: 1.6;
+        }
+        #calibrateButton {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            padding: 15px 30px;
+            font-size: 1.5em;
+            background: #AA399A;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 10px;
+        }
+        #calibrateButton:hover {
+            background-color: #600F54;
+        }
+        #goToMainButton {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            padding: 15px 30px;
+            font-size: 1.5em;
+            background: #AA399A;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 10px;
+            text-decoration: none;
+        }
+        #goToMainButton:hover {
+            background-color: #600F54;
+        }
+        h3 {
+            font-family: "showcard-gothic", sans-serif;
+            color: #AA399A;
+            font-size: 30px;
+            margin: 0;
+        }
+    </style>
+
+</head>
+<body>
+
+    <!--Buttons von den Charakteren auf Eye Tracking Seite-->
+    <div class="button-container">
+        <button class="character-button" id="joyButton" data-character="joy" onclick="buttonClicked('joy')">
+            <img src="/ButtonBilder/joy.jpg" alt="Joy">
+        </button>
+        <button class="character-button" id="sadnessButton" data-character="sadness" onclick="buttonClicked('sadness')">
+            <img src="/ButtonBilder/sadness.jpg" alt="Sadness">
+        </button>
+        <button class="character-button" id="angerButton" data-character="anger" onclick="buttonClicked('anger')">
+            <img src="/ButtonBilder/anger.jpg" alt="Anger">
+        </button>
+        <button class="character-button" id="fearButton" data-character="fear" onclick="buttonClicked('fear')">
+            <img src="/ButtonBilder/fear.jpg" alt="Fear">
+        </button>
+        <button class="character-button" id="disgustButton" data-character="disgust" onclick="buttonClicked('disgust')">
+            <img src="/ButtonBilder/disgust.jpg" alt="Disgust">
+        </button>
+    </div>
+
+    <div class="description">
+        <h3>Wie funktioniert's?</h3>
+        <p>
+            Hier geht um <b>Eye Tracking</b>. Schau auf den Bildschirm mit den Emotions-Charakteren, <b>wähle mit deinen Augen</b> 
+            den passenden aus, und erhalte anschließend Ratschläge & Tipps zum Umgang mit deinen Emotionen.
+        </p>
+    </div>
+
+    <button id="calibrateButton">WebGazer Kalibrieren</button>
+    <a id="goToMainButton" href="/index.html#zielpositionVonEyeTracking">Zur Startseite</a>
+
+    <script src="https://webgazer.cs.brown.edu/webgazer.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            // Code, der auf das Element zugreift
+            const videoContainer = document.getElementById('webgazerVideoContainer');
+            if (videoContainer) {
+                videoContainer.style.display = 'none';
+            }
+        });
+
+        window.onload = function() {
+            webgazer.setRegression('ridge')
+                    .setGazeListener((data, elapsedTime) => {
+                        if (data == null) {
+                            return;
+                        }
+                        const x = data.x;
+                        const y = data.y;
+                        console.log(`Gaze coordinates: (${x}, ${y})`);  // Debugging Ausgabe
+                        checkButtonClick(x, y);
+                    })
+                    .begin();
+        };
+
+        let gazeStartTime = null;
+        let currentButton = null;
+        const gazeDuration = 500; // Dauer in Millisekunden für den Blick
+
+        // Funktion, um zu prüfen, ob ein Button ausgelöst werden soll
+        function checkButtonClick(x, y) {
+            const buttons = document.querySelectorAll('.character-button');
+            buttons.forEach(button => {
+                const rect = button.getBoundingClientRect();
+                if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+                    if (currentButton !== button) {
+                        currentButton = button;
+                        gazeStartTime = new Date().getTime();
+                    } else {
+                        const currentTime = new Date().getTime();
+                        if (currentTime - gazeStartTime >= gazeDuration) {
+                            const character = button.getAttribute('data-character');
+                            redirectToCharacterPage(character);
+                            currentButton = null;
+                            gazeStartTime = null;
+                        }
+                    }
+                } else if (currentButton === button) {
+                    // Reset if gaze moves out of the current button
+                    currentButton = null;
+                    gazeStartTime = null;
+                }
+            });
+        }
+
+        function redirectToCharacterPage(characterId) {
+            const urls = {
+                joy: '/Charakter Seiten/joy.html',
+                sadness: '/Charakter Seiten/sadness.html',
+                anger: '/Charakter Seiten/anger.html',
+                fear: '/Charakter Seiten/fear.html',
+                disgust: '/Charakter Seiten/disgust.html'
+            };
+            window.location.href = urls[characterId];
+        }
+
+        function buttonClicked(characterId) {
+            redirectToCharacterPage(characterId);
+        }
+
+        document.getElementById('calibrateButton').addEventListener('click', () => {
+            window.location.href = '/Anwendungsseiten//WebGazer/www/calibration.html';
+        });
+
+        document.getElementById('goToMainButton').addEventListener('click', () => {
+            window.location.href = '/index.html';
+        });
+    </script>
+
+</body>
+</html>

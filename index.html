@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://use.typekit.net/ojo2ndl.css">
+    <title>FEELINSIDE - Dein Emotions-Tagebuch</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+            scroll-snap-type:proximity;
+        }
+        .section {
+            height: 100vh;
+            display: flex;
+            background-attachment: fixed;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            scroll-snap-align: start;
+        }
+        .section:nth-child(1) {                 /* Section FEELINSIDE */
+            background: url('/Hintergrund/Startseite_Hintergrundbild_1.webp') no-repeat center center fixed;
+            background-size: cover;
+        }
+        .section:nth-child(2) {                 /* Section Willkommen in deinem Emotions-Tagebuch! */
+            background: url('/Hintergrund/Startseite_Hintergrundbild_1.webp') no-repeat center center fixed;
+            background-size: cover;
+            padding-bottom: 50%;
+        }
+        .section:nth-child(3) {                 /* Section Welche Charaktere begleiten dich durch Feelinside? */
+            background: url('/Hintergrund/Startseite_Hintergrundbild_1.webp') no-repeat center center fixed;
+            background-size: cover;
+            padding-top: 10%;
+            padding-bottom: 10%;
+        }
+        .section:nth-child(4) {                 /* Section Noch ein paar Tipps bevor du loslegst*/
+            background: url('/Hintergrund/Startseite_Hintergrundbild_2.webp') no-repeat center center fixed;
+            background-size: cover;
+            padding-top: 10%;
+            padding-bottom: 20%;
+        }
+        .section:nth-child(5) {                 /* Section Wie fühlst du dich? - Gesichtserkennung*/
+            background: url('/Hintergrund/Startseite_Hintergrundbild_2.webp') no-repeat center center fixed;
+            background-size: cover;
+        }
+        .section:nth-child(6) {                 /* Section Lass uns dir helfen! - Eye Tracking*/
+            background: url('/Hintergrund/Startseite_Hintergrundbild_2.webp') no-repeat center center fixed;
+            background-size: cover;
+        }
+        .section:nth-child(7) {                 /* Section Kleines Spiel für gute Laune - Tic Tac Toe*/
+            background: url('/Hintergrund/Startseite_Hintergrundbild_2.webp') no-repeat center center fixed;
+            background-size: cover;
+            padding-bottom: 20%;
+        }
+        .section:nth-child(8) {                 /* Section letztes Bild*/
+            background: url('/Hintergrund/Startseite_Hintergrundbild_3.webp') no-repeat center center fixed;
+            background-size: cover;
+        }
+        .start{
+            margin-top: -20%;
+            text-align: center;
+            color: white;
+        }
+        .start h2 {
+            font-size: 50px;
+        }
+        .start h1 {
+            font-family: "showcard-gothic", sans-serif;
+            font-size: 200px;
+            margin-top: 0;
+            opacity: 85%;
+        }
+        .text {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            margin: 10px;
+            border-radius: 50px;
+            width: 50em;
+            box-sizing: border-box;
+            text-align: center;
+            font-size: 25px;
+        }
+        button {
+            margin-top: 10px;
+            padding: 15px 30px;
+            font-size: 18px;
+            background-color: #AA399A;
+            font-size: 1.2em;
+            line-height: 1.2;
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #600F54;
+        }
+        .description {
+            margin: 30px;
+            font-size: 20px;
+        }
+       /* #calibrate-button {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            padding: 15px 30px;
+            font-size: 30px;
+            background-color: #AA399A;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #calibrate-button:hover {
+            background-color: #600F54;
+        }
+
+        #calibrate-button img {
+            display: none;
+            position: absolute;
+            bottom: calc(100% + 10px); /* Über dem Button mit 10px Abstand 
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #calibrate-button:hover img {
+            display: block;
+        }
+        */
+        .description h3{
+            font-family: "showcard-gothic", sans-serif;
+            color: #AA399A;
+            font-size: 50px;
+            margin:0;
+        }
+        .description p{
+            font-size: 25px;
+            line-height: 1.8em;
+            margin: 30px 0 0 0;
+        }
+        img{
+            padding-top: 10%;
+            padding-bottom: 20% ;
+        }
+        #webgazerVideoFeed {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: -1; /* Hintergrundebene */
+            opacity: 1;
+        }
+        footer{
+            text-align: center;
+            font-family: "showcard-gothic", sans-serif;
+            color: white;
+            font-size: 2.5em;
+            background: #2D1479;
+            padding: 1%;
+        }
+        /* Medienabfragen für verschiedene Bildschirmgrößen */
+        @media (max-width: 768px) {
+            .section {
+                height: 100%;
+            }
+        }
+    </style>
+
+    <script src="https://webgazer.cs.brown.edu/webgazer.js"></script>
+
+</head>
+<body>
+
+    <!--Section Child 1-->
+    <div class="section">
+        <div class="start">
+                <h2>Willkommen in unserer Welt </h2>
+                <h1>FEELINSIDE</h1>
+        </div>
+    </div>
+
+    <!--Section Child 2-->
+    <div class="section">
+        <div class="text">
+            <div class="description">
+                <h3>Willkommen in deinem Emotions-Tagebuch!</h3>
+                <p>
+                    Hier ist dein Raum, um deine Gefühle festzuhalten und zu reflektieren. Inspiriert von <b>Pixar Animationsfilm 
+                    "Inside Out"</b> und begleitet von unseren <b>Emotionen-Charakteren</b>, kannst du täglich deine Erlebnisse notieren. 
+                    Nutze das Tagebuch, um deine Gefühle zu verstehen und positiv zu nutzen. Deine Einträge helfen dir, deine 
+                    emotionale Reise zu verfolgen und dein Wachstum zu sehen. Bist du bereit, deine inneren Welten zu entdecken 
+                    und deine Emotionen zu meistern? Dann lass uns loslegen!
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!--Section Child 3-->
+    <div class="section">
+        <div class="text">
+            <div class="description">
+                <h3>Welche Charaktere begleiten dich durch Feelinside?</h3>
+                <p>
+                    Während du unser Spiel erkundest, wirst du auf <b>fünf einzigartige Charaktere</b> treffen, inspiriert von den 
+                    Grundemotionen aus dem Animationsfilm "Inside Out" von Pixar. Jeder Charakter repräsentiert eine grundlegende 
+                    menschliche Emotion und bringt seine eigene Persönlichkeit und Sichtweise ein.
+                </p>
+            </div>
+        </div>
+
+        <div class="section">
+                <img src="/Hintergrund/Alle_Charaktere.jpg" alt="Joy">
+        </div>    
+    </div>
+
+    <!--Section Child 4-->
+    <div class="section">
+        <div class="text">
+            <div class="description">
+                <h3 style="text-align: center;">Noch ein paar Tipps bevor du loslegst</h3>
+                <p style="text-align: left;">
+                    Bleibe <b>ruhig und konzentriert, um sicherzustellen</b>, dass die Funktionen deine Emotionen und Auswahl richtig erkennen. <br>
+                    Stelle sicher, dass die <b>Kamera deines Geräts eingeschaltet und funktionsfähig</b> ist. Positioniere dich klar und deutlich 
+                    vor der Kamera, um genaue Ergebnisse zu erhalten. 
+                </p>
+                <br><br>
+                <b style="font-size: 1.5em; text-align: center; color: #AA399A">
+                    Viel Spaß beim Entdecken und Meistern deiner Emotionen mit unseren interaktiven Anwendungen! 
+                </b>
+            </div>
+        </div>
+    </div>
+
+    <!--Section Child 5-->
+    <div class="section">
+
+        <!--Anker für goToMainButton-->
+        <div id="zielpositionVonIndex"></div>
+
+        <video id="webgazerVideoFeed" autoplay></video>
+        <div class="text">
+            <div class="description">
+                <h3>Wie fühlst du dich?</h3>
+                <p>
+                    Hattest du heute einen schönen Tag oder bedrückt dich etwas? <b>Teile uns gerne mit, wie du dich aktuell fühlst</b>. 
+                    Indem du uns deinen <b>Gesichtsausdruck</b> zeigst, können wir deine Stimmung besser verstehen und dir passende 
+                    Videoclips anzeigen, die zu deiner aktuellen Gefühlslage passen. Unser Ziel ist es, dir Inhalte zu bieten, 
+                    die genau auf deine momentane Stimmung abgestimmt sind, sei es, um dich <b>aufzuheitern</b>, <b>zu beruhigen</b> oder 
+                    einfach zu <b>unterhalten</b>. Dein Wohlbefinden ist uns wichtig, und wir möchten dir dabei helfen.
+                </p>
+            </div>
+            <button onclick="location.href='/Anwendungsseiten/faceRecognition.html'">Zeigen</button>
+        </div>
+    </div>
+
+    <!--Section Child 6-->
+    <div class="section">
+
+        <!--Anker für goToMainButton-->
+        <div id="zielpositionVonEyeTracking"></div>
+
+        <video id="webgazerVideoFeed" autoplay></video>
+        <div class="text">
+            <div class="description">
+                <h3>Lass uns dir helfen!</h3>
+                <p>
+                    Nachdem du uns deine aktuelle Stimmung gezeigt hast, möchten wir dich <b>helfen</b>! Die Emotionsfreunde bieten 
+                    dir <b>hilfreiche Ratschläge und praktische Tipps</b>, damit du besser mit deinen Emotionen umgehen kannst. Ganz 
+                    gleich, ob du dich großartig fühlst oder etwas dich belastet – wir sind hier, um dir die Unterstützung zu geben, 
+                    die du brauchst, um positiv durch den Tag zu kommen.
+                </p>
+            </div>
+            <button onclick="location.href='/Anwendungsseiten/characters.html'">Helfen lassen</button>
+        </div>
+    </div>
+
+    <!--Section Child 7-->
+    <div class="section">
+
+        <!--Anker für goToMainButton-->
+        <div id="zielpositionVonTicTacToe"></div>
+
+        <video id="webgazerVideoFeed" autoplay></video>
+        <div class="text">
+            <div class="description">
+                <h3>Kleines Spiel für gute Laune</h3>
+                <p>
+                    Jetzt noch ein kleines Spiel, um <b>gute Laune</b> zu sorgen! Dieses Tic Tac Toe Spiel verwendet <b>Eye Tracking</b>, 
+                    um deine Züge zu steuern. Ein <b>roter Punkt</b> zeigt an, wohin du gerade schaust. Setze deine Züge, indem du das 
+                    <b>gewünschte Feld mit deinem Blick</b> auswählst. Das Spiel endet, wenn ein Spieler drei seiner Symbole in einer
+                    Reihe, Spalte oder Diagonale platziert hat oder das Spielfeld voll ist.
+                </p>
+            </div>
+            <button onclick="location.href='/Anwendungsseiten/tictactoe.html'">Spiel starten</button>
+        </div>
+    </div>
+    
+    <!--Section Child 8-->
+    <div class="section">
+        <!--letztes Bild siehe im Stylebereich oben bei .section:nth-child(8) -->
+    </div>
+
+    <footer>
+        <div class="footer">
+            <b style="font-size: 0.5em; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: normal; margin-right: 50%;">Impressum | Datenschutz | Cookie-Einstellungen | AGB</b>
+            <a style="color: white;text-decoration: none;" href="/index.html">Feelinside</a>
+        </div>
+    </footer>
+
+    <!--
+    <button id="calibrate-button" onclick="location.href='/Anwendungsseiten/WebGazer/www/calibration.html'">
+        Kalibrieren 
+    </button> -->
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Webcam-Feed initialisieren
+            webgazer.setRegression('ridge')
+                .setTracker('clmtrackr')
+                .setGazeListener(function(data, clock) {
+                    if (data) {
+                        var x = data.x;
+                        var y = data.y;
+                        checkGaze(x, y);
+                    }
+                })
+                .begin();
+
+            // Video-Elemente einfangen
+            const videoFeeds = document.querySelectorAll('video#webgazerVideoFeed');
+            videoFeeds.forEach(video => {
+                webgazer.setVideoViewer(video);
+            });
+        });
+
+        function checkGaze(x, y) {
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(button => {
+                const rect = button.getBoundingClientRect();
+                if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+                    button.style.backgroundColor = '#0056b3';
+                    setTimeout(() => {
+                        if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+                            button.click();
+                        }
+                    }, 2000);
+                } else {
+                    button.style.backgroundColor = '#007BFF';
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>
